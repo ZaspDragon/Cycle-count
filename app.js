@@ -1,4 +1,4 @@
-const STORAGE_KEY = "cycleCountPro_simple_v1";
+const STORAGE_KEY = "cycleCountPro_simple_v2";
 const DOWNTIME_LIMIT_MINUTES = 25;
 
 const defaultState = {
@@ -60,7 +60,9 @@ function onAddRow() {
   ensureSession();
   addRow();
   saveState();
-  renderAll();
+  renderWorksheet();
+  renderStats();
+  renderSavedSessions();
 }
 
 function generateId() {
@@ -70,16 +72,34 @@ function generateId() {
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return JSON.parse(JSON.stringify(defaultState));
-    return JSON.parse(raw);
+    if (!raw) return deepClone(defaultState);
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return deepClone(defaultState);
+    }
+
+    if (!parsed.sessions || typeof parsed.sessions !== "object") {
+      parsed.sessions = {};
+    }
+
+    if (!("currentSessionId" in parsed)) {
+      parsed.currentSessionId = null;
+    }
+
+    return parsed;
   } catch (e) {
     console.error("Load state failed:", e);
-    return JSON.parse(JSON.stringify(defaultState));
+    return deepClone(defaultState);
   }
 }
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
 }
 
 function setDefaults() {
@@ -148,7 +168,8 @@ function saveCurrentSession() {
   session.updatedAt = new Date().toISOString();
 
   saveState();
-  renderAll();
+  renderSessionInfo();
+  renderSavedSessions();
   alert("Session saved.");
 }
 
@@ -163,12 +184,14 @@ function addRow(prefill = {}) {
     item_number: prefill.item_number || "",
     description: prefill.description || "",
     uom: prefill.uom || "",
-    on_hand_qty: prefill.on_hand_qty || "",
-    counted_qty: prefill.counted_qty || "",
+    on_hand_qty: prefill.on_hand_qty != null ? prefill.on_hand_qty : "",
+    counted_qty: prefill.counted_qty != null ? prefill.counted_qty : "",
     variance: "",
     reason_code: prefill.reason_code || "",
     done: false,
-    count_time: ""
+    count_time: "",
+    last_logged_count_time: null,
+    last_logged_count_value: null
   });
 
   session.updatedAt = new Date().toISOString();
@@ -203,6 +226,11 @@ function handleRowInput(event) {
     row.variance = "";
   }
 
+  const varianceInput = rowEl.querySelector('[data-field="variance"]');
+  if (varianceInput) {
+    varianceInput.value = row.variance;
+  }
+
   const isCountEvent =
     field === "counted_qty" &&
     row.counted_qty !== "" &&
@@ -210,21 +238,41 @@ function handleRowInput(event) {
     row.counted_qty !== undefined;
 
   if (isCountEvent) {
-    recordCountEvent(row);
+    const didLog = recordCountEvent(row);
+
+    if (didLog) {
+      const countTimeSpan = rowEl.querySelector('[data-field="count_time"]');
+      if (countTimeSpan) {
+        countTimeSpan.textContent = row.count_time || "—";
+      }
+    }
   }
 
   session.updatedAt = new Date().toISOString();
   saveState();
-  renderWorksheet();
+
   renderStats();
   renderDowntime();
+  renderSavedSessions();
 }
 
 function recordCountEvent(row) {
   const session = getCurrentSession();
-  if (!session) return;
+  if (!session) return false;
 
   const nowIso = new Date().toISOString();
+  const currentCountValue = String(row.counted_qty);
+
+  if (row.last_logged_count_value === currentCountValue) {
+    return false;
+  }
+
+  if (row.last_logged_count_time) {
+    const secondsSinceLastLog = (new Date(nowIso) - new Date(row.last_logged_count_time)) / 1000;
+    if (secondsSinceLastLog < 1) {
+      return false;
+    }
+  }
 
   if (session.lastCountTime) {
     const gapMin = minutesBetween(session.lastCountTime, nowIso);
@@ -242,6 +290,8 @@ function recordCountEvent(row) {
   }
 
   row.count_time = formatDateTime(nowIso);
+  row.last_logged_count_time = nowIso;
+  row.last_logged_count_value = currentCountValue;
 
   session.activityLog.unshift({
     id: generateId(),
@@ -252,6 +302,7 @@ function recordCountEvent(row) {
   });
 
   session.lastCountTime = nowIso;
+  return true;
 }
 
 function handleRowClick(event) {
@@ -442,7 +493,7 @@ function exportAllJson() {
 function clearSavedData() {
   if (!confirm("Clear all saved data from this browser?")) return;
 
-  state = JSON.parse(JSON.stringify(defaultState));
+  state = deepClone(defaultState);
   saveState();
   renderAll();
 }
