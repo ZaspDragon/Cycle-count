@@ -2,231 +2,224 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
-  <title>Stock Count Worksheet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cycle Count Pro</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="app-header">
-    <div>
-      <h1>Stock Count Worksheet</h1>
-      <p class="sub">GitHub Pages version — no ERP connection required</p>
-    </div>
-
-    <div class="header-actions">
-      <button id="exportSessionBtn" class="secondary">Export Current Session CSV</button>
-      <button id="exportAllBtn" class="secondary">Export All Data JSON</button>
-      <button id="clearAllBtn" class="danger">Clear All Saved Data</button>
-    </div>
-  </header>
-
-  <main class="layout">
-    <section class="card">
-      <h2>Session Setup</h2>
-
-      <div class="form-grid">
-        <label>
-          Counter Name
-          <input id="counterName" type="text" placeholder="Brandon Evanshine" />
-        </label>
-
-        <label>
-          Stock Count ID
-          <input id="stockCountId" type="text" placeholder="L-91-94" />
-        </label>
-
-        <label>
-          Site ID
-          <input id="siteId" type="text" placeholder="OH01" />
-        </label>
-
-        <label>
-          Status
-          <select id="status">
-            <option value="Started">Started</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-            <option value="Reviewed">Reviewed</option>
-          </select>
-        </label>
-
-        <label>
-          Count Date
-          <input id="countDate" type="date" />
-        </label>
-
-        <label>
-          Start Time
-          <input id="startTime" type="time" />
-        </label>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Warehouse count + downtime tracker</p>
+        <h1>Cycle Count Pro</h1>
+        <p class="sub">Track counts, activity gaps, break exclusions, and downtime without ERP.</p>
       </div>
-
-      <div class="toolbar">
-        <button id="newSessionBtn">Start New Session</button>
-        <button id="saveSessionBtn" class="secondary">Save Session</button>
-
-        <label class="import-label">
-          <span>Import Items CSV</span>
-          <input id="csvFile" type="file" accept=".csv" />
-        </label>
+      <div class="hero-actions">
+        <button id="exportSessionCsvBtn" class="btn secondary">Export Session CSV</button>
+        <button id="exportAllJsonBtn" class="btn secondary">Export All JSON</button>
+        <button id="clearSavedBtn" class="btn danger">Clear Saved Data</button>
       </div>
+    </header>
 
-      <div class="hint">
-        CSV headers supported:
-        <code>site_id,bin,item_number,description,uom,on_hand_qty,lot_serial</code>
-      </div>
-    </section>
+    <main class="grid">
+      <section class="card">
+        <div class="section-title-row">
+          <h2>Session Setup</h2>
+          <span id="sessionBadge" class="badge muted">No active session</span>
+        </div>
 
-    <section class="card">
-      <h2>Saved Sessions</h2>
+        <div class="form-grid">
+          <label>
+            Counter Name
+            <input id="counterName" type="text" placeholder="Kris" />
+          </label>
+          <label>
+            Stock Count ID
+            <input id="stockCountId" type="text" placeholder="CC-0402-A" />
+          </label>
+          <label>
+            Site ID
+            <input id="siteId" type="text" placeholder="OHC" />
+          </label>
+          <label>
+            Status
+            <select id="status">
+              <option>Started</option>
+              <option selected>In Progress</option>
+              <option>Completed</option>
+              <option>Reviewed</option>
+            </select>
+          </label>
+          <label>
+            Count Date
+            <input id="countDate" type="date" />
+          </label>
+          <label>
+            Start Time
+            <input id="startTime" type="time" />
+          </label>
+        </div>
 
-      <div class="toolbar compact">
-        <input
-          id="sessionSearch"
-          type="text"
-          placeholder="Search by count ID or counter"
-        />
-      </div>
+        <div class="button-row wrap">
+          <button id="startSessionBtn" class="btn primary">Start New Session</button>
+          <button id="saveSessionBtn" class="btn">Save Session</button>
+          <label class="btn secondary file-btn">
+            Import Items CSV
+            <input id="csvInput" type="file" accept=".csv" hidden />
+          </label>
+        </div>
 
-      <div id="sessionsList" class="sessions-list"></div>
-    </section>
+        <p class="helper">CSV headers supported: <code>site_id,bin,item_number,description,uom,on_hand_qty,lot_serial</code></p>
+      </section>
 
-    <section class="card full-width">
-      <div class="table-header">
-        <div>
+      <section class="card">
+        <div class="section-title-row">
+          <h2>Downtime Rules</h2>
+          <span class="badge">Live</span>
+        </div>
+
+        <div class="form-grid compact">
+          <label>
+            Downtime gap (minutes)
+            <input id="downtimeThreshold" type="number" min="1" value="25" />
+          </label>
+          <label>
+            Paid break 1 (min)
+            <input id="breakOne" type="number" min="0" value="15" />
+          </label>
+          <label>
+            Paid break 2 (min)
+            <input id="breakTwo" type="number" min="0" value="15" />
+          </label>
+          <label>
+            Lunch (min)
+            <input id="lunchBreak" type="number" min="0" value="30" />
+          </label>
+        </div>
+
+        <div class="button-row wrap">
+          <button id="saveRulesBtn" class="btn">Save Rules</button>
+          <button id="simulateGapBtn" class="btn secondary">Check Current Gap</button>
+        </div>
+
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <span>Last count</span>
+            <strong id="lastCountDisplay">—</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Current idle gap</span>
+            <strong id="idleGapDisplay">0 min</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Downtime after breaks</span>
+            <strong id="netDowntimeDisplay">0 min</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="card full-width">
+        <div class="section-title-row">
           <h2>Count Worksheet</h2>
-          <p id="worksheetMeta" class="sub">No session loaded yet.</p>
+          <div class="button-row">
+            <button id="addRowBtn" class="btn primary">Add Row</button>
+          </div>
         </div>
 
-        <div class="toolbar compact">
-          <input
-            id="quickFilter"
-            type="text"
-            placeholder="Filter item, bin, description..."
-          />
-          <button id="addRowBtn" class="secondary">Add Row</button>
+        <div class="stats-grid">
+          <div class="stat"><span>Total Rows</span><strong id="totalRows">0</strong></div>
+          <div class="stat"><span>Done</span><strong id="doneRows">0</strong></div>
+          <div class="stat"><span>Rows w/ Variance</span><strong id="varianceRows">0</strong></div>
+          <div class="stat"><span>Recount Needed</span><strong id="recountRows">0</strong></div>
+          <div class="stat"><span>Downtime Events</span><strong id="downtimeEvents">0</strong></div>
+          <div class="stat"><span>Tracked Activity</span><strong id="activityEvents">0</strong></div>
         </div>
-      </div>
 
-      <div class="summary-bar">
-        <div class="summary-chip">
-          <strong id="totalRowsLabel">0</strong>
-          <span>Total Rows</span>
+        <div class="table-wrap">
+          <table id="worksheetTable">
+            <thead>
+              <tr>
+                <th>Site</th>
+                <th>Bin</th>
+                <th>Item #</th>
+                <th>Description</th>
+                <th>UOM</th>
+                <th>On Hand</th>
+                <th>Counted Qty</th>
+                <th>Variance</th>
+                <th>Lot / Serial</th>
+                <th>Reason Code</th>
+                <th>Done</th>
+                <th>Activity Time</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody id="worksheetBody"></tbody>
+          </table>
         </div>
-        <div class="summary-chip">
-          <strong id="doneRowsLabel">0</strong>
-          <span>Done</span>
-        </div>
-        <div class="summary-chip">
-          <strong id="varianceRowsLabel">0</strong>
-          <span>Rows w/ Variance</span>
-        </div>
-        <div class="summary-chip">
-          <strong id="recountRowsLabel">0</strong>
-          <span>Recount Needed</span>
-        </div>
-      </div>
 
-      <div class="table-wrap">
-        <table id="itemsTable">
-          <thead>
-            <tr>
-              <th>Site</th>
-              <th>Bin</th>
-              <th>Item #</th>
-              <th>Description</th>
-              <th>UOM</th>
-              <th>On Hand</th>
-              <th>Counted Qty</th>
-              <th>Variance</th>
-              <th>Lot / Serial</th>
-              <th>Reason Code</th>
-              <th>Done</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
+        <p class="helper">Workflow: enter bin → verify item → enter counted qty → choose reason code if variance exists → mark done. Every row save records an activity timestamp and checks for downtime gaps.</p>
+      </section>
 
-      <div class="hint">
-        Recommended workflow:
-        <code>scan / enter bin → verify item → enter counted qty → choose reason code if variance exists → mark done</code>
-      </div>
-    </section>
-  </main>
+      <section class="card">
+        <div class="section-title-row">
+          <h2>Downtime Log</h2>
+          <span class="badge alert">Auto</span>
+        </div>
+        <div id="downtimeLog" class="log-list empty-state">No downtime events yet.</div>
+      </section>
+
+      <section class="card">
+        <div class="section-title-row">
+          <h2>Saved Sessions</h2>
+          <span class="badge muted">Local storage</span>
+        </div>
+        <div id="savedSessions" class="saved-session-list empty-state">No saved sessions yet.</div>
+      </section>
+    </main>
+  </div>
 
   <template id="rowTemplate">
     <tr>
-      <td>
-        <input data-field="site_id" type="text" placeholder="OH01" />
-      </td>
-
-      <td>
-        <input data-field="bin" type="text" placeholder="A-25-2" />
-      </td>
-
-      <td>
-        <input data-field="item_number" type="text" placeholder="403119" />
-      </td>
-
-      <td>
-        <input data-field="description" type="text" placeholder="Pipes" />
-      </td>
-
-      <td>
-        <input data-field="uom" type="text" placeholder="Ea / Cs" />
-      </td>
-
-      <td>
-        <input data-field="on_hand_qty" type="number" step="any" placeholder="0" />
-      </td>
-
-      <td>
-        <input data-field="counted_qty" type="number" step="any" placeholder="0" />
-      </td>
-
-      <td class="variance-cell" data-field="variance">0</td>
-
-      <td>
-        <input data-field="lot_serial" type="text" placeholder="Optional" />
-      </td>
-
+      <td><input data-field="site_id" placeholder="OHC" /></td>
+      <td><input data-field="bin" placeholder="A-10-1" /></td>
+      <td><input data-field="item_number" placeholder="607529" /></td>
+      <td><input data-field="description" placeholder="Item description" /></td>
+      <td><input data-field="uom" placeholder="EA" /></td>
+      <td><input data-field="on_hand_qty" type="number" step="1" placeholder="0" /></td>
+      <td><input data-field="counted_qty" type="number" step="1" placeholder="0" /></td>
+      <td><input data-field="variance" class="readonly" readonly /></td>
+      <td><input data-field="lot_serial" placeholder="Lot / Serial" /></td>
       <td>
         <select data-field="reason_code">
-          <option value=""></option>
-          <option value="Count Verified">Count Verified</option>
-          <option value="Misplaced Inventory">Misplaced Inventory</option>
-          <option value="Short Pick">Short Pick</option>
-          <option value="Over Pick">Over Pick</option>
-          <option value="Receiving Error">Receiving Error</option>
-          <option value="Putaway Error">Putaway Error</option>
-          <option value="Transfer Error">Transfer Error</option>
-          <option value="Packaging Difference">Packaging Difference</option>
-          <option value="Damage">Damage</option>
-          <option value="Theft / Loss">Theft / Loss</option>
-          <option value="Count Error">Count Error</option>
-          <option value="System Adjustment">System Adjustment</option>
-          <option value="Slotting Issue">Slotting Issue</option>
-          <option value="Overstock Location">Overstock Location</option>
-          <option value="Investigation Required">Investigation Required</option>
-          <option value="Recount Required">Recount Required</option>
+          <option value="">—</option>
+          <option>Count Verified</option>
+          <option>Misplaced Inventory</option>
+          <option>Short Pick</option>
+          <option>Over Pick</option>
+          <option>Receiving Error</option>
+          <option>Putaway Error</option>
+          <option>Transfer Error</option>
+          <option>Packaging Difference</option>
+          <option>Damage</option>
+          <option>Theft / Loss</option>
+          <option>Count Error</option>
+          <option>System Adjustment</option>
+          <option>Slotting Issue</option>
+          <option>Overstock Location</option>
+          <option>Investigation Required</option>
+          <option>Recount Required</option>
         </select>
       </td>
-
-      <td class="center">
-        <input data-field="done" type="checkbox" />
-      </td>
-
-      <td class="center">
-        <button class="danger small delete-row" type="button" aria-label="Delete row">✕</button>
-      </td>
+      <td class="center"><input data-field="done" type="checkbox" /></td>
+      <td><span data-field="activity_time" class="activity-time">—</span></td>
+      <td class="center"><button data-action="delete" class="icon-btn">✕</button></td>
     </tr>
   </template>
 
+  <script src="app.js"></script>
+</body>
+</html>
   <script src="app.js"></script>
 </body>
 </html>
