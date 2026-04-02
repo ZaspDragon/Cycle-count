@@ -5,178 +5,357 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cycle Count Pro</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f7fb;
+      color: #1f2d3d;
+    }
+
+    .app-shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 42px;
+    }
+
+    .hero p {
+      margin: 0 0 16px;
+      color: #51657d;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 14px 0;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #2f5bea;
+      color: white;
+    }
+
+    .btn.secondary {
+      background: #31445e;
+    }
+
+    .btn.danger {
+      background: #d93b3b;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      margin-top: 18px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    .section-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .section-title-row h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .badge {
+      background: #dbe8ff;
+      color: #2047a8;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .badge.muted {
+      background: #eef2f7;
+      color: #5f7085;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 600;
+      color: #4d6076;
+      gap: 6px;
+    }
+
+    input, select {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #d3dce8;
+      font-size: 16px;
+      background: #fff;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .stat {
+      background: #f6f9fc;
+      border: 1px solid #e3ebf5;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .stat span {
+      display: block;
+      color: #63768d;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .stat strong {
+      font-size: 24px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e8edf4;
+      padding: 10px 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #f7faff;
+      font-size: 14px;
+    }
+
+    td input, td select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .readonly {
+      background: #f1f4f8;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .icon-btn {
+      border: none;
+      background: #d93b3b;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .log-item {
+      border-left: 5px solid #d93b3b;
+      background: #fff5f5;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    .empty-state {
+      color: #687b92;
+      padding: 10px 0;
+    }
+
+    .helper {
+      color: #64768c;
+      margin-top: 8px;
+    }
+
+    .saved-session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .session-item {
+      background: #f7faff;
+      border: 1px solid #dfe8f2;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px) {
+      .form-grid,
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 32px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="app-shell">
     <header class="hero">
-      <div>
-        <p class="eyebrow">Warehouse count + downtime tracker</p>
-        <h1>Cycle Count Pro</h1>
-        <p class="sub">Track counts, activity gaps, break exclusions, and downtime without ERP.</p>
-      </div>
-      <div class="hero-actions">
+      <h1>Cycle Count Pro</h1>
+      <p>Track counted items and log downtime based on time gaps between counts.</p>
+
+      <div class="button-row">
         <button id="exportSessionCsvBtn" class="btn secondary">Export Session CSV</button>
         <button id="exportAllJsonBtn" class="btn secondary">Export All JSON</button>
         <button id="clearSavedBtn" class="btn danger">Clear Saved Data</button>
       </div>
     </header>
 
-    <main class="grid">
-      <section class="card">
-        <div class="section-title-row">
-          <h2>Session Setup</h2>
-          <span id="sessionBadge" class="badge muted">No active session</span>
-        </div>
+    <section class="card">
+      <div class="section-title-row">
+        <h2>Session Setup</h2>
+        <span id="sessionBadge" class="badge muted">No active session</span>
+      </div>
 
-        <div class="form-grid">
-          <label>
-            Counter Name
-            <input id="counterName" type="text" placeholder="Kris" />
-          </label>
-          <label>
-            Stock Count ID
-            <input id="stockCountId" type="text" placeholder="CC-0402-A" />
-          </label>
-          <label>
-            Site ID
-            <input id="siteId" type="text" placeholder="OHC" />
-          </label>
-          <label>
-            Status
-            <select id="status">
-              <option>Started</option>
-              <option selected>In Progress</option>
-              <option>Completed</option>
-              <option>Reviewed</option>
-            </select>
-          </label>
-          <label>
-            Count Date
-            <input id="countDate" type="date" />
-          </label>
-          <label>
-            Start Time
-            <input id="startTime" type="time" />
-          </label>
-        </div>
+      <div class="form-grid">
+        <label>
+          Counter Name
+          <input id="counterName" type="text" placeholder="Kris" />
+        </label>
 
-        <div class="button-row wrap">
-          <button id="startSessionBtn" class="btn primary">Start New Session</button>
-          <button id="saveSessionBtn" class="btn">Save Session</button>
-          <label class="btn secondary file-btn">
-            Import Items CSV
-            <input id="csvInput" type="file" accept=".csv" hidden />
-          </label>
-        </div>
+        <label>
+          Stock Count ID
+          <input id="stockCountId" type="text" placeholder="CC-001" />
+        </label>
 
-        <p class="helper">CSV headers supported: <code>site_id,bin,item_number,description,uom,on_hand_qty,lot_serial</code></p>
-      </section>
+        <label>
+          Site ID
+          <input id="siteId" type="text" placeholder="OHC" />
+        </label>
 
-      <section class="card">
-        <div class="section-title-row">
-          <h2>Downtime Rules</h2>
-          <span class="badge">Live</span>
-        </div>
+        <label>
+          Status
+          <select id="status">
+            <option>Started</option>
+            <option selected>In Progress</option>
+            <option>Completed</option>
+            <option>Reviewed</option>
+          </select>
+        </label>
 
-        <div class="form-grid compact">
-          <label>
-            Downtime gap (minutes)
-            <input id="downtimeThreshold" type="number" min="1" value="25" />
-          </label>
-          <label>
-            Paid break 1 (min)
-            <input id="breakOne" type="number" min="0" value="15" />
-          </label>
-          <label>
-            Paid break 2 (min)
-            <input id="breakTwo" type="number" min="0" value="15" />
-          </label>
-          <label>
-            Lunch (min)
-            <input id="lunchBreak" type="number" min="0" value="30" />
-          </label>
-        </div>
+        <label>
+          Count Date
+          <input id="countDate" type="date" />
+        </label>
 
-        <div class="button-row wrap">
-          <button id="saveRulesBtn" class="btn">Save Rules</button>
-          <button id="simulateGapBtn" class="btn secondary">Check Current Gap</button>
-        </div>
+        <label>
+          Start Time
+          <input id="startTime" type="time" />
+        </label>
+      </div>
 
-        <div class="mini-stats">
-          <div class="mini-stat">
-            <span>Last count</span>
-            <strong id="lastCountDisplay">—</strong>
-          </div>
-          <div class="mini-stat">
-            <span>Current idle gap</span>
-            <strong id="idleGapDisplay">0 min</strong>
-          </div>
-          <div class="mini-stat">
-            <span>Downtime after breaks</span>
-            <strong id="netDowntimeDisplay">0 min</strong>
-          </div>
-        </div>
-      </section>
+      <div class="button-row">
+        <button id="startSessionBtn" class="btn">Start New Session</button>
+        <button id="saveSessionBtn" class="btn secondary">Save Session</button>
+      </div>
+    </section>
 
-      <section class="card full-width">
-        <div class="section-title-row">
-          <h2>Count Worksheet</h2>
-          <div class="button-row">
-            <button id="addRowBtn" class="btn primary">Add Row</button>
-          </div>
-        </div>
+    <section class="card">
+      <div class="section-title-row">
+        <h2>Count Worksheet</h2>
+        <button id="addRowBtn" class="btn">Add Row</button>
+      </div>
 
-        <div class="stats-grid">
-          <div class="stat"><span>Total Rows</span><strong id="totalRows">0</strong></div>
-          <div class="stat"><span>Done</span><strong id="doneRows">0</strong></div>
-          <div class="stat"><span>Rows w/ Variance</span><strong id="varianceRows">0</strong></div>
-          <div class="stat"><span>Recount Needed</span><strong id="recountRows">0</strong></div>
-          <div class="stat"><span>Downtime Events</span><strong id="downtimeEvents">0</strong></div>
-          <div class="stat"><span>Tracked Activity</span><strong id="activityEvents">0</strong></div>
-        </div>
+      <div class="stats-grid">
+        <div class="stat"><span>Total Rows</span><strong id="totalRows">0</strong></div>
+        <div class="stat"><span>Done Rows</span><strong id="doneRows">0</strong></div>
+        <div class="stat"><span>Variance Rows</span><strong id="varianceRows">0</strong></div>
+        <div class="stat"><span>Count Events</span><strong id="activityEvents">0</strong></div>
+        <div class="stat"><span>Downtime Events</span><strong id="downtimeEvents">0</strong></div>
+      </div>
 
-        <div class="table-wrap">
-          <table id="worksheetTable">
-            <thead>
-              <tr>
-                <th>Site</th>
-                <th>Bin</th>
-                <th>Item #</th>
-                <th>Description</th>
-                <th>UOM</th>
-                <th>On Hand</th>
-                <th>Counted Qty</th>
-                <th>Variance</th>
-                <th>Lot / Serial</th>
-                <th>Reason Code</th>
-                <th>Done</th>
-                <th>Activity Time</th>
-                <th>Delete</th>
-              </tr>
-            </thead>
-            <tbody id="worksheetBody"></tbody>
-          </table>
-        </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Site</th>
+              <th>Bin</th>
+              <th>Item #</th>
+              <th>Description</th>
+              <th>UOM</th>
+              <th>On Hand</th>
+              <th>Counted Qty</th>
+              <th>Variance</th>
+              <th>Reason Code</th>
+              <th>Done</th>
+              <th>Count Time</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody id="worksheetBody"></tbody>
+        </table>
+      </div>
 
-        <p class="helper">Workflow: enter bin → verify item → enter counted qty → choose reason code if variance exists → mark done. Every row save records an activity timestamp and checks for downtime gaps.</p>
-      </section>
+      <p class="helper">
+        Downtime is automatically logged when the time between one counted item and the next counted item is over 25 minutes.
+      </p>
+    </section>
 
-      <section class="card">
-        <div class="section-title-row">
-          <h2>Downtime Log</h2>
-          <span class="badge alert">Auto</span>
-        </div>
-        <div id="downtimeLog" class="log-list empty-state">No downtime events yet.</div>
-      </section>
+    <section class="card">
+      <div class="section-title-row">
+        <h2>Downtime Log</h2>
+        <span class="badge">25+ min gap</span>
+      </div>
+      <div id="downtimeLog" class="empty-state">No downtime events yet.</div>
+    </section>
 
-      <section class="card">
-        <div class="section-title-row">
-          <h2>Saved Sessions</h2>
-          <span class="badge muted">Local storage</span>
-        </div>
-        <div id="savedSessions" class="saved-session-list empty-state">No saved sessions yet.</div>
-      </section>
-    </main>
+    <section class="card">
+      <div class="section-title-row">
+        <h2>Saved Sessions</h2>
+        <span class="badge muted">Local browser</span>
+      </div>
+      <div id="savedSessions" class="empty-state">No saved sessions yet.</div>
+    </section>
   </div>
 
   <template id="rowTemplate">
@@ -186,10 +365,9 @@
       <td><input data-field="item_number" placeholder="607529" /></td>
       <td><input data-field="description" placeholder="Item description" /></td>
       <td><input data-field="uom" placeholder="EA" /></td>
-      <td><input data-field="on_hand_qty" type="number" step="1" placeholder="0" /></td>
-      <td><input data-field="counted_qty" type="number" step="1" placeholder="0" /></td>
+      <td><input data-field="on_hand_qty" type="number" placeholder="0" /></td>
+      <td><input data-field="counted_qty" type="number" placeholder="0" /></td>
       <td><input data-field="variance" class="readonly" readonly /></td>
-      <td><input data-field="lot_serial" placeholder="Lot / Serial" /></td>
       <td>
         <select data-field="reason_code">
           <option value="">—</option>
@@ -200,26 +378,17 @@
           <option>Receiving Error</option>
           <option>Putaway Error</option>
           <option>Transfer Error</option>
-          <option>Packaging Difference</option>
           <option>Damage</option>
-          <option>Theft / Loss</option>
           <option>Count Error</option>
-          <option>System Adjustment</option>
-          <option>Slotting Issue</option>
-          <option>Overstock Location</option>
-          <option>Investigation Required</option>
           <option>Recount Required</option>
         </select>
       </td>
       <td class="center"><input data-field="done" type="checkbox" /></td>
-      <td><span data-field="activity_time" class="activity-time">—</span></td>
+      <td><span data-field="count_time">—</span></td>
       <td class="center"><button data-action="delete" class="icon-btn">✕</button></td>
     </tr>
   </template>
 
-  <script src="app.js"></script>
-</body>
-</html>
   <script src="app.js"></script>
 </body>
 </html>
